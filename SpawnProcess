@@ -1,0 +1,73 @@
+#SpawningProcess with Python
+
+import ctypes
+from ctypes.wintypes import HANDLE,DWORD,LPWSTR,WORD,LPBYTE
+
+k_handle = ctypes.WinDLL("Kernel32.dll")
+
+#startup info structure
+class STARTUPINFOA(ctypes.Structure):
+	_fields_ = [
+	("cb", DWORD),
+	("lpReserved", LPWSTR),
+	("lpDesktop", LPWSTR),
+	("lpTitle", LPWSTR),
+	("dwX", DWORD),
+	("dwY", DWORD),
+	("dwXSize", DWORD),
+	("dwYSize", DWORD),
+	("dwXCountChars", DWORD),
+	("dwYCountChars", DWORD),
+	("dwFillAttribute", DWORD),
+	("dwFlags",DWORD),
+	("wShowWindow", WORD),
+	("cbReserved2",WORD),
+	("lpReserved2", LPBYTE),
+	("hStdInput", HANDLE),
+	("hStdOutput", HANDLE),
+	("hStdError",HANDLE),	
+	
+	]
+#ProcInfo structure    
+class PROCESS_INFORMATION(ctypes.Structure):
+	_fields_ = [
+		("hProcess", HANDLE),
+		("hThread", HANDLE),
+		("dwProcessId", DWORD),
+		("dwThreadId", DWORD),
+		]
+ 
+lpApplicationName = "C:\\Windows\\System32\\cmd.exe"
+lpCommandLine = None
+lpProcessAttributes = None
+lpThreadAttributes = None
+lpEnvironment = None
+lpCurrentDirectory = None
+
+dwCreationFlags = 0x00000010 #process creation flags from process information structure
+bInheritHandle = False
+
+lpProcessInformation = PROCESS_INFORMATION()
+lpStartupInfo = STARTUPINFOA()
+
+###Settings set on STARTUPINFO Structure does not seem to make any differences?
+#lpStartupInfo.wShowWindow = 0x1
+#lpStartupInfo.dwFlags = 0x00000002 #0x1
+
+
+response = k_handle.CreateProcessW(lpApplicationName, 
+    lpCommandLine,
+    lpProcessAttributes, 
+    lpThreadAttributes, 
+    bInheritHandle, 
+    dwCreationFlags, 
+    lpEnvironment, 
+    lpCurrentDirectory, 
+    ctypes.byref(lpStartupInfo), 
+    ctypes.byref(lpProcessInformation))
+    
+    
+if response > 0:
+    print("proc is running")
+else:
+    print("failed. errorcode:".format(k_handle.GetLastError()))
